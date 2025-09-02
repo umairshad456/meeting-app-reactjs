@@ -9,7 +9,7 @@ const connectDB = require('./config/database');
 const app = express();
 const PORT = process.env.PORT || 5000;
 connectDB();
-const _dirname = path.resolve();
+const __dirname = path.resolve();
 
 // Middleware
 app.use(express.json());
@@ -33,9 +33,9 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 app.use(errorHandler)
 
-app.use(express.static(path.join(_dirname, '/client/dist')));
-app.get('*', (_, res) => {
-  res.sendFile(path.join(_dirname, "client","dist","index.html"));
+app.use(express.static(path.join(__dirname, '/client/dist')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, "client","dist","index.html"));
 })
 
 // Start server

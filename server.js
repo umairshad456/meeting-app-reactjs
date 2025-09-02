@@ -33,9 +33,10 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use(errorHandler)
 
 app.use(express.static(path.join(__dirname, '/client/dist')));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, "client","dist","index.html"));
-})
+
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, "client","dist","index.html"));
+// })
 
 // Start server
 app.listen(PORT, () => {

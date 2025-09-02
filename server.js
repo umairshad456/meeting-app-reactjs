@@ -1,4 +1,5 @@
 require("dotenv").config({ quiet: true });
+const path = require('path');
 const express = require('express');
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
@@ -8,6 +9,7 @@ const connectDB = require('./config/database');
 const app = express();
 const PORT = process.env.PORT || 5000;
 connectDB();
+const _dirname = path.resolve();
 
 // Middleware
 app.use(express.json());
@@ -16,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
     cors({
-        origin: ["http://localhost:5173", "http://192.168.10.16:5173"],
+        origin: ["https://meeting-app-reactjs.onrender.com"],
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: true,
     })
@@ -31,7 +33,12 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 app.use(errorHandler)
 
+app.use(express.static(path.join(_dirname, '/client/dist')));
+app.get('*', (_, res) => {
+  res.sendFile(path.join(_dirname, "client","dist","index.html"));
+})
+
 // Start server
 app.listen(PORT, () => {
-    console.log(`Server started on port http://192.168.10.16:${PORT}`);
+    console.log(`Server started on port http://localhost:${PORT}`);
 });

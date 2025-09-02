@@ -29,14 +29,14 @@ app.use('/api/participants', require('./routes/participantRoutes'));
 app.use('/api/meetings', require('./routes/meetingRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 
-
 app.use(errorHandler)
 
-app.use(express.static(path.join(__dirname, '/client/dist')));
-
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, "client","dist","index.html"));
-// })
+// 🔹 Serve React frontend
+const buildPath = path.join(__dirname, "client", "dist");
+app.use(express.static(buildPath));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(buildPath, "index.html"));
+});
 
 // Start server
 app.listen(PORT, () => {

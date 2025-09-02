@@ -31,12 +31,10 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 app.use(errorHandler)
 
-// 🔹 Serve React frontend
-const buildPath = path.join(__dirname, "client", "dist");
-app.use(express.static(buildPath));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(buildPath, "index.html"));
-});
+app.use(express.static(path.join(__dirname, '/client/dist')));
+app.get('/*splat', (req, res) => {
+  res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+})
 
 // Start server
 app.listen(PORT, () => {

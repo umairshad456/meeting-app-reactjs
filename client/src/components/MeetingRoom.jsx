@@ -107,28 +107,28 @@ const MeetingRoom = () => {
 
   // ====================================== call recording  ======================================
 
-  useEffect(() => {
-    // This effect handles recording notifications.
-    if (!call) return;
+  // useEffect(() => {
+  //   // This effect handles recording notifications.
+  //   if (!call) return;
 
-    audioRef.current = new Audio('/sounds/recording-saved.mp3'); // Create audio element
+  //   audioRef.current = new Audio('/sounds/recording-saved.mp3'); // Create audio element
 
-    const handleRecordingStarted = () => {
-      setNotification({ message: 'Call recording has started.', type: 'info' });
-    };
+  //   const handleRecordingStarted = () => {
+  //     setNotification({ message: 'Call recording has started.', type: 'info' });
+  //   };
 
-    const handleRecordingStopped = () => {
-      setNotification({ message: 'Call recording has stopped. Processing...', type: 'info' });
-    };
+  //   const handleRecordingStopped = () => {
+  //     setNotification({ message: 'Call recording has stopped. Processing...', type: 'info' });
+  //   };
 
-    const subscriptionStarted = call.on('recording_started', handleRecordingStarted);
-    const subscriptionStopped = call.on('recording_stopped', handleRecordingStopped);
+  //   const subscriptionStarted = call.on('recording_started', handleRecordingStarted);
+  //   const subscriptionStopped = call.on('recording_stopped', handleRecordingStopped);
 
-    return () => {
-      subscriptionStarted.unsubscribe();
-      subscriptionStopped.unsubscribe();
-    };
-  }, [call]);
+  //   return () => {
+  //     subscriptionStarted.unsubscribe();
+  //     subscriptionStopped.unsubscribe();
+  //   };
+  // }, [call]);
 
 
 

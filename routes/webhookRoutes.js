@@ -56,7 +56,8 @@ router.post("/stream-webhook", async (req, res) => {
               sessionId: session_id
             }
           }
-        }
+        },
+         { upsert: true, new: true } 
       )
       console.log("Saved Recording", savedRecording)
     }
@@ -68,6 +69,7 @@ router.post("/stream-webhook", async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

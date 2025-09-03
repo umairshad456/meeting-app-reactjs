@@ -10,6 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 connectDB();
 
+
 // Middleware
 app.use(express.json());
 app.use(cookieParser())
@@ -33,6 +34,7 @@ app.use("/api/webhooks", require("./routes/webhookRoutes"));
 
 app.use(errorHandler)
 
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(express.static(path.join(__dirname, '/client/dist')));
 app.get('/*splat', (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));

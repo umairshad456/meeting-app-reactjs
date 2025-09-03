@@ -196,7 +196,7 @@ const MeetingRoom = () => {
         {/* Basic controls for everyone */}
         <div className="flex items-center gap-2">
           <CallControls onLeave={() => window.location.href = endcall} />
-          {userPermissions.canManageParticipants && call && (
+{/*           {userPermissions.canManageParticipants && call && (
             <button
               onClick={() => {
                 if (isCallRecordingInProgress) {
@@ -217,7 +217,7 @@ const MeetingRoom = () => {
               </svg>
               <span>{isCallRecordingInProgress ? 'Stop Recording' : 'Start Recording'}</span>
             </button>
-          )}
+          )} */}
         </div>
 
         {/* ====================================== Host and co-host controls ====================================== */}

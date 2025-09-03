@@ -309,7 +309,7 @@ const MeetingTypeList = () => {
                 navigator.clipboard.writeText(meetingLink);
                 toast.success('Success: Link copied to clipboard');
               }}
-              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
             >
               Copy Meeting Link
             </button>
@@ -349,7 +349,7 @@ const MeetingTypeList = () => {
                 navigator.clipboard.writeText(meetingLink);
                 alert('Success: Link copied to clipboard');
               }}
-              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
             >
               Copy Meeting Link
             </button>

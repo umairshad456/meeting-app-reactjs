@@ -11,6 +11,7 @@ router.post("/stream-webhook", async (req, res) => {
     const callId = event.call?.id;
 
     console.log("event received", event)
+    console.log("callId", callId)
 
     if (event.type === "call.recording_ready") {
       const { url, filename, start_time, end_time, session_id } = event.call_recording;
@@ -39,7 +40,9 @@ router.post("/stream-webhook", async (req, res) => {
       // Generate your own permanent URL
       const newUrl = `/uploads/${filename}`;
 
-      await recordingModel.findOneAndUpdate(
+      console.log("newurl", newUrl)
+
+      const savedRecording = await recordingModel.findOneAndUpdate(
         { callId: callId },
         {
           $push: {
@@ -53,8 +56,9 @@ router.post("/stream-webhook", async (req, res) => {
           }
         }
       )
+      console.log("Saved Recording", savedRecording)
     }
-    res.status(200).send("Webhook received");
+    res.status(200).send({ message: "Webhook received and meeting saved" });
   } catch (err) {
     console.error("Webhook error:", err);
     res.status(500).send("Webhook failed");
@@ -62,6 +66,7 @@ router.post("/stream-webhook", async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

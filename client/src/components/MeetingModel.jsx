@@ -224,7 +224,7 @@ const MeetingModal = ({
         {handleClick && (
           <button
             type="button"
-            className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            className="flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
             onClick={() => {
               handleClick(selectedParticipants, externalEmails)
               setSelectedParticipantIds([])

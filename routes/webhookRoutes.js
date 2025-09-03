@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const axios = require("axios")
+const path = require('path')
+const fs = require('fs')
 
 router.post("/stream-webhook", async (req, res) => {
-    try {
+  try {
     const event = req.body;
 
     //event received {
@@ -44,8 +47,13 @@ router.post("/stream-webhook", async (req, res) => {
       });
 
       console.log("File saved:", filePath);
+
+
+
+
       console.log("Recording ready for call:", call_cid);
       console.log("Recording URL:", recording.url); // This is your video file
+
       // TODO: Save this URL in your DB so participants can access later
     }
 
@@ -56,5 +64,41 @@ router.post("/stream-webhook", async (req, res) => {
   }
 });
 
-module.exports = router;
 
+router.get("/url", async (req, res) => {
+  try {
+    const { url, filename } = req.body;
+
+    console.log("req.body", req.body)
+
+    const uploadDir = path.join(process.cwd(), "uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+
+
+    // File path to save
+    const filePath = path.join(uploadDir, filename);
+
+    // Download and save file
+    const response = await axios.get(url, { responseType: "stream" });
+    console.log("response i got", response)
+    const writer = fs.createWriteStream(filePath);
+
+    response.data.pipe(writer);
+
+    await new Promise((resolve, reject) => {
+      writer.on("finish", resolve);
+      writer.on("error", reject);
+    });
+
+    console.log("File saved:", filePath);
+
+
+  } catch (error) {
+    console.error("error in get url:", error);
+    return res.status(500).json({ message: "Failed to get" })
+  }
+})
+
+module.exports = router;

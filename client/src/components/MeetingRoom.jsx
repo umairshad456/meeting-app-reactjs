@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import clsx from 'clsx';
 import {
   CallControls,
@@ -8,7 +8,7 @@ import {
   PaginatedGridLayout,
   SpeakerLayout,
   useCallStateHooks,
-  useCall
+  useCall,
 } from '@stream-io/video-react-sdk';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 import {
@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { LayoutList, Users } from 'lucide-react';
+import { LayoutList, MessageSquare, Users } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import EndCallButton from './EndCallButton';
 import Loader from './Loader';
@@ -26,27 +26,26 @@ import PendingRequestsPanel from './PendingRequestsPanel';
 import ParticipantsList from '../components/ParticipantsList';
 import HostRequestNotification from './Notification';
 import axiosInstance from '../apis/axiosInstance';
+import CallChatWidget from './CallChatWidget';
 
 const endcall = 'http://localhost:5173/';
 
+//==================================================================================================================
 const MeetingRoom = () => {
   const [layout, setLayout] = useState('speaker-left');
   const [showParticipants, setShowParticipants] = useState(false);
   const { searchParams } = useParams();
-  const { useCallCallingState, useCallCustomData } = useCallStateHooks();
+  const { useCallCallingState, useCallCustomData, useIsCallRecordingInProgress } = useCallStateHooks();
   const call = useCall();
   const callingState = useCallCallingState();
-  
   const customData = useCallCustomData();
   // const isPersonalRoom = !!searchParams('personal');
   const isPersonalRoom = false;
+  const [showChat, setShowChat] = useState(false);
 
-  const [reloadKey, setReloadKey] = useState(0);
-
-  const reload = () => {
-    setReloadKey(prev => prev + 1);
-  };
-
+  const isCallRecordingInProgress = useIsCallRecordingInProgress();
+  const audioRef = useRef(null);
+  const [notification, setNotification] = useState(null);
 
   const [userRole, setUserRole] = useState('participant');
   const [userPermissions, setUserPermissions] = useState({
@@ -56,10 +55,17 @@ const MeetingRoom = () => {
     canModifyHosts: false
   });
 
+  // for reloading
+  const [reloadKey, setReloadKey] = useState(0);
+  const reload = () => {
+    setReloadKey(prev => prev + 1);
+  };
+
+  // get user id and email from localstorage
   const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
   const userEmail = typeof window !== 'undefined' ? localStorage.getItem('email') : null;
 
-  // Add this useEffect to your MeetingRoom component
+  // ====================================== Add this useEffect to your MeetingRoom component ======================================
   useEffect(() => {
     const handleRoleChange = (event) => {
       if (event.key === 'userRole' && event.newValue) {
@@ -72,8 +78,8 @@ const MeetingRoom = () => {
     return () => window.removeEventListener('storage', handleRoleChange);
   }, []);
 
-  // Update the syncUserRole function to store role in localStorage
 
+  // ====================================== Update the syncUserRole function to store role in localStorage ======================================
   useEffect(() => {
     const syncUserRole = async () => {
       if (!userId || !call?.id) return;
@@ -99,6 +105,34 @@ const MeetingRoom = () => {
   }, [userId, call?.id, userRole, userPermissions]);
 
 
+  // ====================================== call recording  ======================================
+
+  useEffect(() => {
+    // This effect handles recording notifications.
+    if (!call) return;
+
+    audioRef.current = new Audio('/sounds/recording-saved.mp3'); // Create audio element
+
+    const handleRecordingStarted = () => {
+      setNotification({ message: 'Call recording has started.', type: 'info' });
+    };
+
+    const handleRecordingStopped = () => {
+      setNotification({ message: 'Call recording has stopped. Processing...', type: 'info' });
+    };
+
+    const subscriptionStarted = call.on('recording_started', handleRecordingStarted);
+    const subscriptionStopped = call.on('recording_stopped', handleRecordingStopped);
+
+    return () => {
+      subscriptionStarted.unsubscribe();
+      subscriptionStopped.unsubscribe();
+    };
+  }, [call]);
+
+
+
+  // ====================================== calling States ======================================
   if (callingState !== CallingState.JOINED) {
     if (callingState === CallingState.RECONNECTING) {
       return <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
@@ -108,6 +142,7 @@ const MeetingRoom = () => {
     return <Loader />;
   }
 
+  // ====================================== call layout ======================================
   const CallLayout = () => {
     switch (layout) {
       case 'grid': return <PaginatedGridLayout />;
@@ -123,8 +158,8 @@ const MeetingRoom = () => {
       {userEmail && (
         <div className="absolute top-4 left-1/2 z-50 rounded-md bg-gray-800 px-4 py-2 text-sm text-white shadow-md">
           {userEmail}
-          {userRole === 'host' && <span className="text-blue-400"> (host)</span>}
-          {userRole === 'cohost' && <span className="text-green-400"> (co-host)</span>}
+          {userRole === 'host' && <span className="text-blue-400"> (host)</span> || "User"}
+          {userRole === 'cohost' && <span className="text-green-400"> (co-host)</span> || "User"}
         </div>
       )}
 
@@ -135,12 +170,22 @@ const MeetingRoom = () => {
         </div>
 
         {/* ====================================== Participants panel ====================================== */}
-        <div className={clsx(
-          'absolute right-0 z-50 top-4 h-[calc(100vh-96px)] p-5  bg-gray-800 shadow-lg transition-transform duration-300 ease-in-out',
-          showParticipants ? 'translate-x-0' : 'translate-x-full'
-        )}>
-          <CallParticipantsList onClose={() => setShowParticipants(false)} />
-        </div>
+        {showParticipants && (
+          <div className="absolute right-0 z-50 top-4 h-[calc(100vh-96px)] p-5  bg-gray-800 shadow-lg transition-transform duration-300 ease-in-out">
+            <CallParticipantsList onClose={() => setShowParticipants(false)} />
+          </div>
+        )}
+
+        {/* Chat panel */}
+        {showChat && (
+          <div className="absolute right-0 top-4 h-[calc(100vh-96px)] w-[360px] bg-gray-800 shadow-lg p-5 z-40 transition-transform duration-300 ease-in-out">
+            {call && (
+              <CallChatWidget
+                call={call}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {/* ============================ Host Request Notifications ============================ */}
@@ -151,6 +196,28 @@ const MeetingRoom = () => {
         {/* Basic controls for everyone */}
         <div className="flex items-center gap-2">
           <CallControls onLeave={() => window.location.href = endcall} />
+          {userPermissions.canManageParticipants && call && (
+            <button
+              onClick={() => {
+                if (isCallRecordingInProgress) {
+                  call.stopRecording();
+                } else {
+                  call.startRecording();
+                }
+              }}
+              className={clsx(
+                'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium',
+                isCallRecordingInProgress ? 'bg-red-600' : 'bg-gray-700',
+                'hover:bg-red-500 transition-colors'
+              )}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle-dot">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="1" />
+              </svg>
+              <span>{isCallRecordingInProgress ? 'Stop Recording' : 'Start Recording'}</span>
+            </button>
+          )}
         </div>
 
         {/* ====================================== Host and co-host controls ====================================== */}
@@ -170,6 +237,16 @@ const MeetingRoom = () => {
         >
           <Users size={20} />
           <span>Participants</span>
+        </button>
+
+        {/* ====================================== chat toggle ====================================== */}
+
+        <button
+          onClick={() => setShowChat(!showChat)}
+          className={clsx('flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium', showChat ? 'bg-blue-600' : 'bg-gray-700', 'hover:bg-blue-500 transition-colors')}
+        >
+          <MessageSquare size={20} />
+          <span>Chat</span>
         </button>
 
         {/* ====================================== Layout selection ====================================== */}

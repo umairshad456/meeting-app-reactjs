@@ -8,7 +8,10 @@ const recordingModel = require('../models/recordingModel')
 router.post("/stream-webhook", async (req, res) => {
   try {
     const event = req.body;
-    const callId = event.call?.id;
+    const callId = event.call?.id 
+  ? event.call.id 
+  : event.call_cid.split(":")[1];
+
 
     console.log("event received", event)
     console.log("callId", callId)
@@ -66,6 +69,7 @@ router.post("/stream-webhook", async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

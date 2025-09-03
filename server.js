@@ -28,6 +28,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/participants', require('./routes/participantRoutes'));
 app.use('/api/meetings', require('./routes/meetingRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/chats', require('./routes/chatRoutes'));
+app.use("/api/webhooks", require("./routes/webhookRoutes"));
 
 app.use(errorHandler)
 

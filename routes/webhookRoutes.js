@@ -48,7 +48,7 @@ router.post("/stream-webhook", async (req, res) => {
 
       console.log("File saved:", filePath);
 
-      console.log("Recording URL:", recording.url); // This is your video file
+      // console.log("Recording URL:", recording.url); // This is your video file
 
       // TODO: Save this URL in your DB so participants can access later
     }
@@ -98,4 +98,5 @@ router.get("/url", async (req, res) => {
 })
 
 module.exports = router;
+
 
